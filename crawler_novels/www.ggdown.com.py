@@ -19,6 +19,10 @@ DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 ROOT_URL = "http://www.ggdown.com" # 网站根目录
 GENERAL_PATH = ""                      # 通用路径
 NOVEL_SUB_ID = "29/29516"              # 目录页面ID
+NOVEL_SUB_ID = "39/39533"              # 目录页面ID
+NOVEL_SUB_ID = "89/89816"              # 目录页面ID
+# NOVEL_SUB_ID = "40/40827"              # 目录页面ID
+NOVEL_SUB_ID = "81/81691"              # 目录页面ID
 ENCODING = "GBK"                    # 页面文字编码
 CHAPTER_POST = 1
 "http://www.ggdown.com/29/29516/index.html"
@@ -93,7 +97,15 @@ def rtn_chapter_txt(chapterHtml):
         txtContent = txtContent.replace("    ", "")
         txtContent = txtContent.replace("                ", "")
         txtContent = txtContent.replace("\n\n", "\n")
+        txtContent = txtContent.replace("\xa0", "")
         txtContent = txtContent.replace("记住我们的网址噢。百度搜;格！！格！！党.或者直接输域名/g/g/d/o/w/n/./c/o/m", "")
+        txtContent = txtContent.replace("\n电脑天使这边走→", "")
+        txtContent = txtContent.replace("\nWAP天使戳这边→", "")
+        txtContent = txtContent.replace('\n")>', "")
+        txtContent = txtContent.replace("\nAPP天使来这边→", "")
+
+
+
 
         # txtContent = txtContent.split("/c/o/m")[1] + "\n"
         print(txtContent)
@@ -107,6 +119,7 @@ def rtn_chapter_txt(chapterHtml):
 
 def write_txt_content(txtFileName, chapterName, chapterTxt, encoding):
     with open(txtFileName, 'a', encoding=encoding) as f:
+        chapterName = chapterName.replace("www.ggdown.com", "")
         if chapterName == "接":
             pass
         else:
@@ -127,11 +140,14 @@ if __name__ == '__main__':
         if (os.path.exists(novelFilePath)):
             os.remove(novelFilePath)
 
+    n = 0
     for chapterInfo in chapterListInfo:
+
+        n += 1
 
         chapterUrl = "{0}/{1}/{2}".format(ROOT_URL, NOVEL_SUB_ID, chapterInfo["href"])
 
-        plog.debug("网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"]))
+        plog.debug("{3}/{4} 网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"], n, len(chapterListInfo)))
 
         chapterHtml = chrome_get_html_all_content(chapterUrl, "pagecontent", ENCODING)
 
