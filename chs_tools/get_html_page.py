@@ -86,6 +86,7 @@ def get_html_all_content(url, pageFlag, encode):
     :return:
     '''
     # time.sleep(2)
+    html = ""
     getFlag = False
     while getFlag == False:
         try:

@@ -16,35 +16,36 @@ plog = C_PrintLog()
 PARAINFO = rtn_parainfo()
 DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 
-ROOT_URL = "http://www.ggdown.com" # 网站根目录
-GENERAL_PATH = ""                      # 通用路径
+ROOT_URL = "https://www.aishula.com" # 网站根目录
+GENERAL_PATH = "html"                      # 通用路径
 # NOVEL_SUB_ID = "29/29516"              # 目录页面ID
 # NOVEL_SUB_ID = "39/39533"              # 目录页面ID
 # NOVEL_SUB_ID = "89/89816"              # 目录页面ID
 # NOVEL_SUB_ID = "40/40827"              # 目录页面ID
 # NOVEL_SUB_ID = "81/81691"              # 目录页面ID
 # NOVEL_SUB_ID = "41/41467"              # 目录页面ID
-NOVEL_SUB_ID = "5/5142"              # 目录页面ID
-NOVEL_SUB_ID = "50/50297"              # 目录页面ID
+NOVEL_SUB_ID = "14/14927"              # 目录页面ID
 ENCODING = "GBK"                    # 页面文字编码
 CHAPTER_POST = 1
-"http://www.ggdown.com/29/29516/index.html"
+"https://www.aishula.com/html/14/14927/"
 if GENERAL_PATH == "":
-    FULL_URL = "{0}/{1}/index.html".format(ROOT_URL, NOVEL_SUB_ID)
+    FULL_URL = "{0}/{1}/".format(ROOT_URL, NOVEL_SUB_ID)
 else:
-    FULL_URL = "{0}/{1}/{2}/index.html".format(ROOT_URL, GENERAL_PATH, NOVEL_SUB_ID)
-plog.debug("小说下载首页为：{0}".format(FULL_URL))
+    FULL_URL = "{0}/{1}/{2}/".format(ROOT_URL, GENERAL_PATH, NOVEL_SUB_ID)
+plog.debug("下载首页为：{0}".format(FULL_URL))
 
 
 def rtn_chapter_list_info(html):
     soup = BeautifulSoup(html, 'html.parser')
-    novelName = soup.find_all(name="div", attrs={"class": "btitle"})[0].h1.text
+    novelName = soup.find_all(name="div", attrs={"id": "TextTitle"})[0].span.text
     # novelName = novelName.split("《")[1]
     # novelName = novelName.split("》")[0]
     # novelName = "妾本惊华"
+    novelName = novelName.replace("全文免费阅读", "")
+    novelName = novelName.strip()
     plog.debug("开始下载《{0}》".format(novelName))
 
-    chapterListInfoSoup = soup.find_all(name="dd")
+    chapterListInfoSoup = soup.find_all(name="div", attrs={"id": "BookText"})[0].find_all(name="dd")
     # print(chapterListInfoSoup)
 
     chapterListInfoArr = []
@@ -89,7 +90,7 @@ def rtn_chapter_txt(chapterHtml):
     soup = BeautifulSoup(chapterHtml, 'html.parser')
 
     try:
-        soupSub = soup.find_all(name="div", attrs={"id": "pagecontent"})[0]
+        soupSub = soup.find_all(name="div", attrs={"id": "booktext"})[0]
         # soupSubStr = str(soupSub)
         # print("---------------soupSubStr-----------------\n",soupSubStr,"\n\n\n\n")
         # soupSubStr = "{0}{1}".format(soupSubStr.split("<div")[0],"</article>")
@@ -99,16 +100,15 @@ def rtn_chapter_txt(chapterHtml):
         txtContent = soupSub.text
         txtContent = txtContent.replace("    ", "")
         txtContent = txtContent.replace("                ", "")
+        # txtContent = txtContent.replace("\n\r", "\n")
+        # txtContent = txtContent.replace("\r\n", "\n")
         txtContent = txtContent.replace("\n\n", "\n")
         txtContent = txtContent.replace("\xa0", "")
-        txtContent = txtContent.replace("记住我们的网址噢。百度搜;格！！格！！党.或者直接输域名/g/g/d/o/w/n/./c/o/m", "")
+        txtContent = txtContent.replace("page_top();", "")
         txtContent = txtContent.replace("\n电脑天使这边走→", "")
         txtContent = txtContent.replace("\nWAP天使戳这边→", "")
         txtContent = txtContent.replace('\n")>', "")
         txtContent = txtContent.replace("\nAPP天使来这边→", "")
-        txtContent = txtContent.replace("(✺ω✺) ", "")
-        txtContent = txtContent.replace("\u273a", "")
-        txtContent = txtContent.replace("\u273a", "")
 
         txtContent = txtContent + "\n"
 
@@ -136,7 +136,7 @@ def write_txt_content(txtFileName, chapterName, chapterTxt, encoding):
 
 if __name__ == '__main__':
 
-    html = chrome_get_html_all_content(FULL_URL, "bookinfo", ENCODING)
+    html = get_html_all_content(FULL_URL, "booktitle", ENCODING)
 
     # 返回章节信息
     chapterListInfo, novelName = rtn_chapter_list_info(html)
@@ -152,11 +152,11 @@ if __name__ == '__main__':
 
         n += 1
 
-        chapterUrl = "{0}/{1}/{2}".format(ROOT_URL, NOVEL_SUB_ID, chapterInfo["href"])
+        chapterUrl = "{0}{1}".format(ROOT_URL, chapterInfo["href"])
 
         plog.debug("{3}/{4} 网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"], n, len(chapterListInfo)))
 
-        chapterHtml = chrome_get_html_all_content(chapterUrl, "pagecontent", ENCODING)
+        chapterHtml = get_html_all_content(chapterUrl, "booktext", ENCODING)
 
         chapterTxt = rtn_chapter_txt(chapterHtml)
         # print(str(chapterHtml))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 __author__ = 'SlovEnt'
-__date__ = '2019/6/24 22:07'
+__date__ = '2019/6/25 19:21'
 
 import time
 import os
@@ -10,41 +10,35 @@ from chs_tools.get_html_page import get_html_all_content, chrome_get_html_all_co
 from chs_tools.print_log import C_PrintLog
 from chs_tools.param_info import rtn_parainfo
 import traceback
+import re
 
 
 plog = C_PrintLog()
 PARAINFO = rtn_parainfo()
 DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 
-ROOT_URL = "http://www.ggdown.com" # 网站根目录
+ROOT_URL = "https://www.67shu.com" # 网站根目录
 GENERAL_PATH = ""                      # 通用路径
-# NOVEL_SUB_ID = "29/29516"              # 目录页面ID
-# NOVEL_SUB_ID = "39/39533"              # 目录页面ID
-# NOVEL_SUB_ID = "89/89816"              # 目录页面ID
-# NOVEL_SUB_ID = "40/40827"              # 目录页面ID
-# NOVEL_SUB_ID = "81/81691"              # 目录页面ID
-# NOVEL_SUB_ID = "41/41467"              # 目录页面ID
-NOVEL_SUB_ID = "5/5142"              # 目录页面ID
-NOVEL_SUB_ID = "50/50297"              # 目录页面ID
-ENCODING = "GBK"                    # 页面文字编码
+NOVEL_SUB_ID = "88/109794"              # 目录页面ID
+ENCODING = "gbk"                    # 页面文字编码
 CHAPTER_POST = 1
-"http://www.ggdown.com/29/29516/index.html"
+"https://www.67shu.com/88/109794/"
 if GENERAL_PATH == "":
-    FULL_URL = "{0}/{1}/index.html".format(ROOT_URL, NOVEL_SUB_ID)
+    FULL_URL = "{0}/{1}/".format(ROOT_URL, NOVEL_SUB_ID)
 else:
-    FULL_URL = "{0}/{1}/{2}/index.html".format(ROOT_URL, GENERAL_PATH, NOVEL_SUB_ID)
+    FULL_URL = "{0}/{1}/{2}/".format(ROOT_URL, GENERAL_PATH, NOVEL_SUB_ID)
 plog.debug("小说下载首页为：{0}".format(FULL_URL))
 
 
 def rtn_chapter_list_info(html):
     soup = BeautifulSoup(html, 'html.parser')
-    novelName = soup.find_all(name="div", attrs={"class": "btitle"})[0].h1.text
-    # novelName = novelName.split("《")[1]
-    # novelName = novelName.split("》")[0]
+    novelName = soup.find_all(name="div", attrs={"class": "intro"})[0].h3.text
+    novelName = novelName.split("《")[1]
+    novelName = novelName.split("》")[0]
     # novelName = "妾本惊华"
     plog.debug("开始下载《{0}》".format(novelName))
 
-    chapterListInfoSoup = soup.find_all(name="dd")
+    chapterListInfoSoup = soup.find_all(name="div", attrs={"class": "novel_list"})[0].find_all(name="dd")
     # print(chapterListInfoSoup)
 
     chapterListInfoArr = []
@@ -89,7 +83,7 @@ def rtn_chapter_txt(chapterHtml):
     soup = BeautifulSoup(chapterHtml, 'html.parser')
 
     try:
-        soupSub = soup.find_all(name="div", attrs={"id": "pagecontent"})[0]
+        soupSub = soup.find_all(name="div", attrs={"id": "content"})[0]
         # soupSubStr = str(soupSub)
         # print("---------------soupSubStr-----------------\n",soupSubStr,"\n\n\n\n")
         # soupSubStr = "{0}{1}".format(soupSubStr.split("<div")[0],"</article>")
@@ -97,20 +91,22 @@ def rtn_chapter_txt(chapterHtml):
         # soupSub = BeautifulSoup(soupSubStr, 'html.parser')
 
         txtContent = soupSub.text
+        if "免费阅读！" in txtContent:
+            txtContent = txtContent.split("免费阅读！")[1]
         txtContent = txtContent.replace("    ", "")
         txtContent = txtContent.replace("                ", "")
+        txtContent = txtContent.replace("\n\r", "")
         txtContent = txtContent.replace("\n\n", "\n")
         txtContent = txtContent.replace("\xa0", "")
+        txtContent = txtContent.replace("\n?", "")
         txtContent = txtContent.replace("记住我们的网址噢。百度搜;格！！格！！党.或者直接输域名/g/g/d/o/w/n/./c/o/m", "")
-        txtContent = txtContent.replace("\n电脑天使这边走→", "")
-        txtContent = txtContent.replace("\nWAP天使戳这边→", "")
-        txtContent = txtContent.replace('\n")>', "")
-        txtContent = txtContent.replace("\nAPP天使来这边→", "")
-        txtContent = txtContent.replace("(✺ω✺) ", "")
-        txtContent = txtContent.replace("\u273a", "")
-        txtContent = txtContent.replace("\u273a", "")
+        txtContent = txtContent.replace("\n- 肉肉屋", "")
+        txtContent = txtContent.replace("\n恋耽美", "")
+        txtContent = txtContent.replace("\n夺心调教(H) 作者:熊先生", "")
 
-        txtContent = txtContent + "\n"
+        # txtContent = re.split("分卷阅读\d+", txtContent)[1]
+
+        txtContent = txtContent
 
 
         # txtContent = txtContent.split("/c/o/m")[1] + "\n"
@@ -125,8 +121,7 @@ def rtn_chapter_txt(chapterHtml):
 
 def write_txt_content(txtFileName, chapterName, chapterTxt, encoding):
     with open(txtFileName, 'a', encoding=encoding) as f:
-        chapterName = chapterName.replace("www.ggdown.com", "")
-        chapterName = chapterName.replace(" ：", "")
+        # chapterName = chapterName.replace("www.ggdown.com", "")
         if chapterName == "接":
             pass
         else:
@@ -136,7 +131,7 @@ def write_txt_content(txtFileName, chapterName, chapterTxt, encoding):
 
 if __name__ == '__main__':
 
-    html = chrome_get_html_all_content(FULL_URL, "bookinfo", ENCODING)
+    html = get_html_all_content(FULL_URL, "info_right", ENCODING)
 
     # 返回章节信息
     chapterListInfo, novelName = rtn_chapter_list_info(html)
@@ -152,11 +147,11 @@ if __name__ == '__main__':
 
         n += 1
 
-        chapterUrl = "{0}/{1}/{2}".format(ROOT_URL, NOVEL_SUB_ID, chapterInfo["href"])
+        chapterUrl = "{0}/{1}".format(FULL_URL, chapterInfo["href"])
 
         plog.debug("{3}/{4} 网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"], n, len(chapterListInfo)))
 
-        chapterHtml = chrome_get_html_all_content(chapterUrl, "pagecontent", ENCODING)
+        chapterHtml = get_html_all_content(chapterUrl, "yuedu_zhengwen", ENCODING)
 
         chapterTxt = rtn_chapter_txt(chapterHtml)
         # print(str(chapterHtml))
@@ -165,3 +160,4 @@ if __name__ == '__main__':
             write_txt_content(novelFilePath, chapterInfo["text"], chapterTxt, ENCODING)
         else:
             plog.error("获取失败！！！！！！")
+
