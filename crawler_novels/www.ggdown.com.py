@@ -26,6 +26,7 @@ GENERAL_PATH = ""                      # 通用路径
 # NOVEL_SUB_ID = "41/41467"              # 目录页面ID
 NOVEL_SUB_ID = "5/5142"              # 目录页面ID
 NOVEL_SUB_ID = "50/50297"              # 目录页面ID
+NOVEL_SUB_ID = "44/44664"              # 目录页面ID
 ENCODING = "GBK"                    # 页面文字编码
 CHAPTER_POST = 1
 "http://www.ggdown.com/29/29516/index.html"

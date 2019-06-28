@@ -19,7 +19,7 @@ DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 
 ROOT_URL = "https://www.95shubao.com" # 网站根目录
 GENERAL_PATH = ""                      # 通用路径
-NOVEL_SUB_ID = "85/85012"              # 目录页面ID
+NOVEL_SUB_ID = "44/44664"              # 目录页面ID
 ENCODING = "utf-8"                    # 页面文字编码
 CHAPTER_POST = 1
 "https://www.95shubao.com/85/85012/"
