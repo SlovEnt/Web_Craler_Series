@@ -18,15 +18,7 @@ DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 
 ROOT_URL = "http://www.ggdown.com" # 网站根目录
 GENERAL_PATH = ""                      # 通用路径
-# NOVEL_SUB_ID = "29/29516"              # 目录页面ID
-# NOVEL_SUB_ID = "39/39533"              # 目录页面ID
-# NOVEL_SUB_ID = "89/89816"              # 目录页面ID
-# NOVEL_SUB_ID = "40/40827"              # 目录页面ID
-# NOVEL_SUB_ID = "81/81691"              # 目录页面ID
-# NOVEL_SUB_ID = "41/41467"              # 目录页面ID
-NOVEL_SUB_ID = "5/5142"              # 目录页面ID
-NOVEL_SUB_ID = "50/50297"              # 目录页面ID
-NOVEL_SUB_ID = "44/44664"              # 目录页面ID
+NOVEL_SUB_ID = "29/29671"              # 目录页面ID
 ENCODING = "GBK"                    # 页面文字编码
 CHAPTER_POST = 1
 "http://www.ggdown.com/29/29516/index.html"
@@ -109,7 +101,8 @@ def rtn_chapter_txt(chapterHtml):
         txtContent = txtContent.replace("\nAPP天使来这边→", "")
         txtContent = txtContent.replace("(✺ω✺) ", "")
         txtContent = txtContent.replace("\u273a", "")
-        txtContent = txtContent.replace("\u273a", "")
+        txtContent = txtContent.replace("\u2028", "")
+        txtContent = txtContent.replace("\u2764", "")
 
         txtContent = txtContent + "\n"
 
@@ -154,6 +147,7 @@ if __name__ == '__main__':
         n += 1
 
         chapterUrl = "{0}/{1}/{2}".format(ROOT_URL, NOVEL_SUB_ID, chapterInfo["href"])
+        chapterUrl = "{0}{1}".format(ROOT_URL, chapterInfo["href"])
 
         plog.debug("{3}/{4} 网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"], n, len(chapterListInfo)))
 
