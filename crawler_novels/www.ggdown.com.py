@@ -18,7 +18,7 @@ DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 
 ROOT_URL = "http://www.ggdown.com" # 网站根目录
 GENERAL_PATH = ""                      # 通用路径
-NOVEL_SUB_ID = "29/29671"              # 目录页面ID
+NOVEL_SUB_ID = "book/84"              # 目录页面ID
 ENCODING = "GBK"                    # 页面文字编码
 CHAPTER_POST = 1
 "http://www.ggdown.com/29/29516/index.html"
