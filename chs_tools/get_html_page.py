@@ -67,19 +67,20 @@ def get_new_headers(url):
 
     ]
     headers = {'User-Agent': random.choice(user_agent),
-               # 'Host': url,
-               # 'referer': url,
-               # 'Upgrade-Insecure-Requests': '1',
+               'Host': url,
+               'referer': url,
+               'Upgrade-Insecure-Requests': '1',
+               'cache-control': 'max-age=0',
                # 'Connection': 'Keep-Alive',
-               # 'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
+               'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
                # 'Accept - Encoding': 'gzip, deflate',
-               # 'Accept-Language': 'zh-Hans-CN, zh-Hans; q=0.5',
+               'Accept-Language': 'zh-Hans-CN, zh-Hans; q=0.5',
                # ':authority': url,
                # ':method': "GET",
                }
     return headers
 
-def get_html_all_content(url, pageFlag, encode):
+def get_html_all_content(url, pageFlag, encode, headersFlag=None):
     '''
     :param url:  网址
     :param pageFlag: 爬取页面标识（特征，确认正确获取页面）
@@ -90,8 +91,11 @@ def get_html_all_content(url, pageFlag, encode):
     getFlag = False
     while getFlag == False:
         try:
-            headers = get_new_headers(url)
-            r = requests.get(url=url, headers=headers, timeout=30, verify=False)
+            if headersFlag == None:
+                headers = get_new_headers(url)
+            else:
+                headers = headersFlag
+            r = requests.get(url=url, params=headers, timeout=30, verify=False)
             r.raise_for_status()
 
             html = r.content.decode(encode, 'ignore')

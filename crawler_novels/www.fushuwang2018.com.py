@@ -11,33 +11,31 @@ from chs_tools.print_log import C_PrintLog
 from chs_tools.param_info import rtn_parainfo
 import traceback
 
-
 plog = C_PrintLog()
 PARAINFO = rtn_parainfo()
 DOWN_FLODERS = PARAINFO["NOVEL_DOWN_FLODERS"]
 
-ROOT_URL = "http://www.ggdown.com" # 网站根目录
-GENERAL_PATH = ""                      # 通用路径
-NOVEL_SUB_ID = "78/78406"              # 目录页面ID
-ENCODING = "GBK"                    # 页面文字编码
+ROOT_URL = "http://www.fushuwang2018.com" # 网站根目录
+GENERAL_PATH = ""       # 通用路径
+NOVEL_SUB_ID = "959" # 目录页面ID
+ENCODING = "UTF-8" # 页面文字编码
 CHAPTER_POST = 1
-"http://www.ggdown.com/29/29516/index.html"
 if GENERAL_PATH == "":
-    FULL_URL = "{0}/{1}/index.html".format(ROOT_URL, NOVEL_SUB_ID)
+    FULL_URL = "{0}/{1}/".format(ROOT_URL, NOVEL_SUB_ID)
 else:
-    FULL_URL = "{0}/{1}/{2}/index.html".format(ROOT_URL, GENERAL_PATH, NOVEL_SUB_ID)
+    FULL_URL = "{0}/{1}/{3}/".format(ROOT_URL, GENERAL_PATH, NOVEL_SUB_ID)
 plog.debug("小说下载首页为：{0}".format(FULL_URL))
 
 
 def rtn_chapter_list_info(html):
     soup = BeautifulSoup(html, 'html.parser')
-    novelName = soup.find_all(name="div", attrs={"class": "btitle"})[0].h1.text
-    # novelName = novelName.split("《")[1]
+    novelName = soup.find_all(name="div", attrs={"class": "book-describe"})[0].h1.text
+    novelName = novelName.replace("/", "")
     # novelName = novelName.split("》")[0]
     # novelName = "妾本惊华"
     plog.debug("开始下载《{0}》".format(novelName))
 
-    chapterListInfoSoup = soup.find_all(name="dd")
+    chapterListInfoSoup = soup.find_all(name="div", attrs={"class": "book-list f-cb"})[0].find_all("li")
     # print(chapterListInfoSoup)
 
     chapterListInfoArr = []
@@ -47,8 +45,8 @@ def rtn_chapter_list_info(html):
         # print(ddItem)
         n += 1
 
-        # if n <= 12:
-        #     continue
+        if n <= 12:
+            continue
 
         chapterListInfoDict = OrderedDict()
         chapterListInfoDict2 = OrderedDict()
@@ -82,7 +80,7 @@ def rtn_chapter_txt(chapterHtml):
     soup = BeautifulSoup(chapterHtml, 'html.parser')
 
     try:
-        soupSub = soup.find_all(name="div", attrs={"id": "pagecontent"})[0]
+        soupSub = soup.find_all(name="div", attrs={"class": "m-article-text"})[0]
         # soupSubStr = str(soupSub)
         # print("---------------soupSubStr-----------------\n",soupSubStr,"\n\n\n\n")
         # soupSubStr = "{0}{1}".format(soupSubStr.split("<div")[0],"</article>")
@@ -91,36 +89,22 @@ def rtn_chapter_txt(chapterHtml):
 
         txtContent = soupSub.text
         txtContent = txtContent.replace("    ", "")
+        txtContent = txtContent.replace("\nisgood();", "")
         txtContent = txtContent.replace("                ", "")
         txtContent = txtContent.replace("\n\n", "\n")
-        txtContent = txtContent.replace("\xa0", "")
-        txtContent = txtContent.replace("记住我们的网址噢。百度搜;格！！格！！党.或者直接输域名/g/g/d/o/w/n/./c/o/m", "")
-        txtContent = txtContent.replace("\n电脑天使这边走→", "")
-        txtContent = txtContent.replace("\nWAP天使戳这边→", "")
-        txtContent = txtContent.replace('\n")>', "")
-        txtContent = txtContent.replace("\nAPP天使来这边→", "")
-        txtContent = txtContent.replace("(✺ω✺) ", "")
-        txtContent = txtContent.replace("\u273a", "")
-        txtContent = txtContent.replace("\u2028", "")
-        txtContent = txtContent.replace("\u2764", "")
+        txtContent = txtContent.replace("\n                    -->>本章未完，点击下一页继续阅读", "")
+        txtContent = txtContent.replace("\n    -->>本章未完，点击下一页继续阅读", "")
 
-        txtContent = txtContent + "\n"
-
-
-        # txtContent = txtContent.split("/c/o/m")[1] + "\n"
         print(txtContent)
         return txtContent
 
     except:
         time.sleep(2)
-        traceback.print_exc()
         print("--------------- chapterHtml error -----------------\n", chapterHtml)
         return False
 
 def write_txt_content(txtFileName, chapterName, chapterTxt, encoding):
     with open(txtFileName, 'a', encoding=encoding) as f:
-        chapterName = chapterName.replace("www.ggdown.com", "")
-        chapterName = chapterName.replace(" ：", "")
         if chapterName == "接":
             pass
         else:
@@ -129,34 +113,34 @@ def write_txt_content(txtFileName, chapterName, chapterTxt, encoding):
         f.write(chapterTxt)
 
 if __name__ == '__main__':
+    try:
 
-    html = chrome_get_html_all_content(FULL_URL, "bookinfo", ENCODING)
+        html = chrome_get_html_all_content(FULL_URL, "book-describe", ENCODING)
+        print(html)
 
-    # 返回章节信息
-    chapterListInfo, novelName = rtn_chapter_list_info(html)
+        # 返回章节信息
+        chapterListInfo, novelName = rtn_chapter_list_info(html)
 
-    novelFilePath = r"{0}\{1}.txt".format(DOWN_FLODERS, novelName)
+        novelFilePath = r"{0}\{1}.txt".format(DOWN_FLODERS, novelName)
 
-    if CHAPTER_POST == 1:
-        if (os.path.exists(novelFilePath)):
-            os.remove(novelFilePath)
+        if CHAPTER_POST == 1:
+            if (os.path.exists(novelFilePath)):
+                os.remove(novelFilePath)
 
-    n = 0
-    for chapterInfo in chapterListInfo:
+        for chapterInfo in chapterListInfo:
 
-        n += 1
+            chapterUrl = "{0}".format(chapterInfo["href"])
 
-        chapterUrl = "{0}/{1}/{2}".format(ROOT_URL, NOVEL_SUB_ID, chapterInfo["href"])
-        chapterUrl = "{0}{1}".format(ROOT_URL, chapterInfo["href"])
+            plog.debug("网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"]))
 
-        plog.debug("{3}/{4} 网址：{0}，页面章节标题：{2}，文件路径：{1} ！！！".format(chapterUrl, novelFilePath, chapterInfo["text"], n, len(chapterListInfo)))
+            chapterHtml = chrome_get_html_all_content(chapterUrl, "m-article-text", ENCODING)
 
-        chapterHtml = chrome_get_html_all_content(chapterUrl, "pagecontent", ENCODING)
+            chapterTxt = rtn_chapter_txt(chapterHtml)
+            # print(str(chapterHtml))
 
-        chapterTxt = rtn_chapter_txt(chapterHtml)
-        # print(str(chapterHtml))
-
-        if chapterTxt is not False:
-            write_txt_content(novelFilePath, chapterInfo["text"], chapterTxt, ENCODING)
-        else:
-            plog.error("获取失败！！！！！！")
+            if chapterTxt is not False:
+                write_txt_content(novelFilePath, chapterInfo["text"], chapterTxt, ENCODING)
+            else:
+                plog.error("获取失败！！！！！！")
+    except Exception as e:
+        traceback.print_exc()
